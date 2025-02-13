@@ -1,0 +1,13 @@
+*.pyc
+__pycache__/
+logs/
+.DS_Store
+.env
+*.pth
+/checkpoint/
+/my_method/clash-for-linux/
+/my_method/data/aircraft/fgvc-aircraft-2013b/
+/my_method/data/cub2011/CUB_200_2011/
+/my_method/longclip/checkpoints/
+/my_method/save_path/
+*.pt
