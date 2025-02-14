@@ -8,6 +8,8 @@ import torch.nn as nn
 from tqdm import tqdm
 from itertools import chain
 from torch.optim.lr_scheduler import MultiStepLR
+from torch.optim import Adam
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torch.nn.functional as F
 import view_ex as ve
 from longclip.model import longclip
@@ -32,8 +34,17 @@ class MultiViewFGVC(nn.Module):
         self.criterion = nn.CrossEntropyLoss()
         self.cate = CATE()
         trainable_params = chain(self.cate.parameters(), self.ad_net.parameters(), self.aggregator.parameters(),self.text_net.parameters(),self.concept_net.parameters(),self.global_net.parameters(),self.relation_net.parameters())
-        self.optimizer = torch.optim.SGD(trainable_params, lr=self.lr, momentum=0.9, weight_decay=1e-4)
-        self.scheduler = MultiStepLR(self.optimizer, milestones=[20, 50, 100], gamma=0.1)
+        # self.optimizer = torch.optim.SGD(trainable_params, lr=self.lr, momentum=0.9, weight_decay=1e-4)
+        # self.scheduler = MultiStepLR(self.optimizer, milestones=[20, 50, 100], gamma=0.1)
+        self.optimizer = Adam(trainable_params, lr=1e-3)  
+        self.scheduler = ReduceLROnPlateau(
+            self.optimizer, 
+            mode='min',     
+            factor=0.1,  
+            patience=3,     
+            verbose=True,   
+            min_lr=1e-6  
+        )
         self.recovery_weight = 1
         # self.num_loacal  = 5
         # self.select_concepts  = 10
@@ -88,7 +99,8 @@ class MultiViewFGVC(nn.Module):
             selected_features = output[torch.arange(batch_size), max_similarity_indices] #output 16*32*512,selected_features 16*512
             output_filter = self.select_top_features(output,selected_features,top_k=self.select_locals) #
             concepts_filter = self.find_most_similar_concepts(p_c, output_filter)
-
+            
+            self.optimizer.zero_grad()
             local_logits,global_logits,text_logits,concept_logits,all_logits = self.compute_reprs(output_filter,global_features,global_text_feature,concepts_filter)
             cc_loss = self.concept_contrastive_loss(global_im,p_c,n_c,weights)
             # del im, im_text, labels, image_features, global_features, global_text_feature
@@ -96,7 +108,6 @@ class MultiViewFGVC(nn.Module):
 
             loss = self.criterion(all_logits + (self.recovery_weight * local_logits) + global_logits + text_logits + (self.recovery_weight * concept_logits), labels)+cc_loss
             #print(loss
-            self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
         # 每save_interval轮保存一次权重
@@ -157,6 +168,7 @@ class MultiViewFGVC(nn.Module):
             total += labels.size(0)  # 总样本数
             accuracy = 100 * correct / total
         mean_loss = sum(loss_list) / len(loss_list)
+        self.scheduler.step(mean_loss) 
         print(f"Test Loss: {mean_loss:.4f}, Accuracy: {accuracy:.2f}%")
 
     def compute_reprs(self,im,glbal_in,text_feature,concepts_filter):
