@@ -8,13 +8,15 @@ from torch.utils.data import random_split
 import resnet
 from longclip.model import longclip
 import time
+from transforms import RProxyTransformTrain, RProxyTransformTest
 from fgvc_dataset.cub2011 import Cub2011
 from fgvc_dataset.aircraft import Aircraft
 
 def main():
     args = Options().parse()
     device = 'cuda'
-
+    train_transform = RProxyTransformTrain()
+    test_transform = RProxyTransformTest()
     # transform = transforms.Compose([
     #     transforms.Resize((224, 224)),  # 将图像调整为 224x224 大小
     #     transforms.RandomHorizontalFlip(p=0.5),  # 随机水平翻转，概率为 0.5
@@ -27,10 +29,11 @@ def main():
     # train_size = int(0.8 * len(dataset))
     # test_size = len(dataset) - train_size
     # train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
-    # train_dataset = Cub2011('/root/autodl-tmp/fine/my_method/data/cub2011', train=True)
-    # test_dataset = Cub2011('/root/autodl-tmp/fine/my_method/data/cub2011', train=False)
-    train_dataset = Aircraft('/root/autodl-tmp/fine/my_method/data/aircraft', train=True)
-    test_dataset = Aircraft('/root/autodl-tmp/fine/my_method/data/aircraft', train=False)
+    # train_dataset = Cub2011('/root/autodl-tmp/fine/my_method/data/cub2011', train=True,transform=train_transform)
+    # test_dataset = Cub2011('/root/autodl-tmp/fine/my_method/data/cub2011', train=False,transform=test_transform)
+
+    train_dataset = Aircraft('/root/autodl-tmp/fine/my_method/data/aircraft', train=True,transform=train_transform)
+    test_dataset = Aircraft('/root/autodl-tmp/fine/my_method/data/aircraft', train=False,transform=test_transform)
     train_loader = DataLoader(train_dataset, batch_size=args.bs, shuffle=True,drop_last=True)
     test_loader = DataLoader(test_dataset, batch_size=args.bs, shuffle=False,drop_last=True)   
 
