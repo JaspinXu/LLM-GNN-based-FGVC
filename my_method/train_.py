@@ -1,14 +1,9 @@
 # import os
 # os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:256'
-from torch.utils.data import Dataset
-from PIL import Image
-from torchvision import transforms
-from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
-# import clip
 import torch
 from model import graphgen,GCN,Mapper,DisjointRelationNet,GAT_
-from cub_dataset import CUBImageDataset
+from chaos.cub_dataset import CUBImageDataset
 import torch.nn as nn
 from tqdm import tqdm
 from itertools import chain
@@ -20,19 +15,20 @@ from enhanced import gen_patch
 from cate import CATE
 import time
 
-class MultiViewHausdorff(nn.Module):
-    def __init__(self, input_dim, feature_dim,device, clip_model,lr,extractor):
-        super(MultiViewHausdorff, self).__init__()
+class MultiViewFGVC(nn.Module):
+    def __init__(self, input_dim, feature_dim, num_classes, device, clip_model,lr,extractor):
+        super(MultiViewFGVC, self).__init__()
         self.device = device
+        self.num_classes = num_classes
         self.clip = clip_model.to(self.device)
         self.lr = lr
         self.extractor = extractor.to(self.device)
         self.aggregator = GCN(num_in_features=input_dim, num_out_features=feature_dim).to(self.device)
-        self.ad_net=Mapper(feature_dim=feature_dim,out_dim=feature_dim,num_classes=200).to(self.device)
-        self.global_net = Mapper(feature_dim=feature_dim, out_dim=feature_dim, num_classes=200).to(self.device)
-        self.text_net = Mapper(feature_dim=feature_dim, out_dim=feature_dim, num_classes=200).to(self.device)
-        self.concept_net = Mapper(feature_dim=feature_dim, out_dim=feature_dim, num_classes=200).to(self.device)
-        self.relation_net = DisjointRelationNet(feature_dim=feature_dim * 4, out_dim=feature_dim, num_classes=200).to(self.device)
+        self.ad_net=Mapper(feature_dim=feature_dim,out_dim=feature_dim,num_classes=self.num_classes).to(self.device)
+        self.global_net = Mapper(feature_dim=feature_dim, out_dim=feature_dim, num_classes=self.num_classes).to(self.device)
+        self.text_net = Mapper(feature_dim=feature_dim, out_dim=feature_dim, num_classes=self.num_classes).to(self.device)
+        self.concept_net = Mapper(feature_dim=feature_dim, out_dim=feature_dim, num_classes=self.num_classes).to(self.device)
+        self.relation_net = DisjointRelationNet(feature_dim=feature_dim * 4, out_dim=feature_dim, num_classes=self.num_classes).to(self.device)
         self.criterion = nn.CrossEntropyLoss()
         self.cate = CATE()
         trainable_params = chain(self.cate.parameters(), self.ad_net.parameters(), self.aggregator.parameters(),self.text_net.parameters(),self.concept_net.parameters(),self.global_net.parameters(),self.relation_net.parameters())
@@ -45,7 +41,8 @@ class MultiViewHausdorff(nn.Module):
         self.num_loacal  = 36
         self.select_concepts  = 40
         self.select_locals = 20
-        self.concept_path =  "/root/autodl-tmp/fine/my_method/data/cub2011/des_and_concept/cub_concepts__512_longclip.pt"
+        # self.concept_path =  "/root/autodl-tmp/fine/my_method/data/cub2011/des_and_concept/cub_concepts__512_longclip.pt"
+        self.concept_path =  "/root/autodl-tmp/fine/my_method/data/aircraft/des_and_concept/aircraft_concepts__512_longclip.pt"
     def train_one_epoch(self, trainloader, epoch,save_path):
         print('Training %d epoch' % epoch)
         save_interval=10

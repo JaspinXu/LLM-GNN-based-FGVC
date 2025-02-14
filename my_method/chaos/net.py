@@ -2,7 +2,7 @@ import resnet
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from cub_dataset import CUBImageDataset
+from my_method.chaos.cub_dataset import CUBImageDataset
 from torchvision import transforms
 from torch.utils.data import random_split, DataLoader
 

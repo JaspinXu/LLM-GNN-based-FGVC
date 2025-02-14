@@ -7,7 +7,7 @@ from torch_geometric.loader import DataLoader
 import clip
 import torch
 from model import graphgen,GCN,Mapper,DisjointRelationNet
-from cub_dataset import CUBImageDataset
+from my_method.chaos.cub_dataset import CUBImageDataset
 import torch.nn as nn
 from tqdm import tqdm
 from itertools import chain

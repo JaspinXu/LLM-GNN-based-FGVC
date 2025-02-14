@@ -5,7 +5,8 @@ from tqdm import tqdm
 import json
 
 # 设置 API 密钥
-api_key = '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'
+# api_key = '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'
+api_key = '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'
 os.environ["OPENAI_API_KEY"] = api_key
 client = OpenAI()
 

@@ -1,6 +1,8 @@
 import torch
-# import clip
-from PIL import Image
+import sys
+import os
+current_file_path = os.path.abspath(__file__)
+sys.path.append(os.path.dirname(os.path.dirname(current_file_path)))
 from longclip.model import longclip
 
 def extract_features(file_path):
@@ -37,7 +39,7 @@ def save_embeddings_to_file(embeddings, file_path):
 if __name__ == "__main__":
     # model, preprocess = clip.load("ViT-B/32", device="cuda" if torch.cuda.is_available() else "cpu")
     model, preprocess = longclip.load("/root/autodl-tmp/fine/my_method/longclip/checkpoints/longclip-B.pt", device="cuda" if torch.cuda.is_available() else "cpu")
-    file_path = '/root/autodl-tmp/fine/my_method/cub.txt'  # 替换为你的txt文件路径
+    file_path = '/root/autodl-tmp/fine/my_method/data/aircraft/des_and_concept/aircraft.txt'  # 替换为你的txt文件路径
     features = extract_features(file_path)
     feature_list = [item for sublist in features for item in sublist]
     print(len(feature_list))
@@ -45,7 +47,7 @@ if __name__ == "__main__":
     embeddings = generate_word_embeddings(feature_list, model, preprocess)
 
     # 保存嵌入到 .pt 文件
-    save_embeddings_to_file(embeddings, "word_embeddings_512_longclip.pt")
+    save_embeddings_to_file(embeddings, "/root/autodl-tmp/fine/my_method/data/aircraft/des_and_concept/aircraft_concepts__512_longclip.pt")
     print(len(feature_list))
     
 
