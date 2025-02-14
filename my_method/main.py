@@ -29,11 +29,11 @@ def main():
     # train_size = int(0.8 * len(dataset))
     # test_size = len(dataset) - train_size
     # train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
-    # train_dataset = Cub2011('/root/autodl-tmp/fine/my_method/data/cub2011', train=True,transform=train_transform)
-    # test_dataset = Cub2011('/root/autodl-tmp/fine/my_method/data/cub2011', train=False,transform=test_transform)
+    train_dataset = Cub2011('/root/autodl-tmp/fine/my_method/data/cub2011', train=True,transform=train_transform)
+    test_dataset = Cub2011('/root/autodl-tmp/fine/my_method/data/cub2011', train=False,transform=test_transform)
 
-    train_dataset = Aircraft('/root/autodl-tmp/fine/my_method/data/aircraft', train=True,transform=train_transform)
-    test_dataset = Aircraft('/root/autodl-tmp/fine/my_method/data/aircraft', train=False,transform=test_transform)
+    # train_dataset = Aircraft('/root/autodl-tmp/fine/my_method/data/aircraft', train=True,transform=train_transform)
+    # test_dataset = Aircraft('/root/autodl-tmp/fine/my_method/data/aircraft', train=False,transform=test_transform)
     train_loader = DataLoader(train_dataset, batch_size=args.bs, shuffle=True,drop_last=True)
     test_loader = DataLoader(test_dataset, batch_size=args.bs, shuffle=False,drop_last=True)   
 
@@ -44,7 +44,7 @@ def main():
     # state_dict = torch.load(args.ckpt_path)
     # model.load_state_dict(state_dict, strict=True)
     extractor = resnet.resnet50(pretrained=True, pth_path="/root/autodl-tmp/fine/my_method/resnet50-19c8e357.pth")
-    train_model = MultiViewFGVC(input_dim=512,feature_dim=512,num_classes = 100,device='cuda',clip_model=model,lr=args.lr,extractor=extractor)
+    train_model = MultiViewFGVC(input_dim=512,feature_dim=512,num_classes = 200,device='cuda',clip_model=model,lr=args.lr,extractor=extractor)
     # train_model = EnhancedMultiViewHausdorff(input_dim=512,feature_dim=512,device='cuda',clip_model=model,lr=args.lr,extractor=extractor,circle_layers=5, circle_step=20)    
     for epoch in range(args.epochs):
         train_model.train_one_epoch(train_loader, epoch,args.savepath)

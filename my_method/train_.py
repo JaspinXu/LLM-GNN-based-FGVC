@@ -41,8 +41,8 @@ class MultiViewFGVC(nn.Module):
         self.num_loacal  = 36
         self.select_concepts  = 40
         self.select_locals = 20
-        # self.concept_path =  "/root/autodl-tmp/fine/my_method/data/cub2011/des_and_concept/cub_concepts__512_longclip.pt"
-        self.concept_path =  "/root/autodl-tmp/fine/my_method/data/aircraft/des_and_concept/aircraft_concepts__512_longclip.pt"
+        self.concept_path =  "/root/autodl-tmp/fine/my_method/data/cub2011/des_and_concept/cub_concepts__512_longclip.pt"
+        # self.concept_path =  "/root/autodl-tmp/fine/my_method/data/aircraft/des_and_concept/aircraft_concepts__512_longclip.pt"
     def train_one_epoch(self, trainloader, epoch,save_path):
         print('Training %d epoch' % epoch)
         save_interval=10
