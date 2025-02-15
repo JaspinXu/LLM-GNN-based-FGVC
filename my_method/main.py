@@ -43,7 +43,7 @@ def main():
     # model, preprocess = clip.load("ViT-B/32", device="cuda" if torch.cuda.is_available() else "cpu")
     # state_dict = torch.load(args.ckpt_path)
     # model.load_state_dict(state_dict, strict=True)
-    extractor = resnet.resnet50(pretrained=True, pth_path="/root/autodl-tmp/fine/my_method/resnet50-19c8e357.pth")
+    extractor = resnet.resnet50(pth_path="/root/autodl-tmp/fine/my_method/resnet50-19c8e357.pth",pretrained=True)
     train_model = MultiViewFGVC(input_dim=512,feature_dim=512,num_classes = 200,device='cuda',clip_model=model,lr=args.lr,extractor=extractor)
     # train_model = EnhancedMultiViewHausdorff(input_dim=512,feature_dim=512,device='cuda',clip_model=model,lr=args.lr,extractor=extractor,circle_layers=5, circle_step=20)    
     for epoch in range(args.epochs):

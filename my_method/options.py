@@ -13,7 +13,7 @@ class Options:
         # parser.add_argument("--test-bsize", default=128, type=int, help="Test batch size.")
         parser.add_argument("--root_dir",default='/root/autodl-tmp/fine/my_method/data/cub2011/CUB_200_2011/images',type=str,help="image dir")
         parser.add_argument("--label_file",default='/root/autodl-tmp/fine/my_method/data/cub2011/CUB_200_2011/classes.txt',type=str,help="label dir")
-        parser.add_argument("--bs",default=16,type=int,help="batch_size")
+        parser.add_argument("--bs",default=32,type=int,help="batch_size")
         parser.add_argument("--lr",default=0.001,type=int,help="learning_rate")
         parser.add_argument("--epochs",default=100,type=int,help="learning_rate")
         parser.add_argument("--savepath",default="/root/autodl-tmp/fine/my_method/save_path",type=str,help="learning_rate")

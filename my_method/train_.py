@@ -25,6 +25,9 @@ class MultiViewFGVC(nn.Module):
         self.clip = clip_model.to(self.device)
         self.lr = lr
         self.extractor = extractor.to(self.device)
+        for param in self.extractor.parameters():
+            param.requires_grad = False
+        self.extractor.fc = nn.Linear(self.extractor.fc.in_features, self.num_classes)
         self.aggregator = GCN(num_in_features=input_dim, num_out_features=feature_dim).to(self.device)
         self.ad_net=Mapper(feature_dim=feature_dim,out_dim=feature_dim,num_classes=self.num_classes).to(self.device)
         self.global_net = Mapper(feature_dim=feature_dim, out_dim=feature_dim, num_classes=self.num_classes).to(self.device)
@@ -33,17 +36,17 @@ class MultiViewFGVC(nn.Module):
         self.relation_net = DisjointRelationNet(feature_dim=feature_dim * 4, out_dim=feature_dim, num_classes=self.num_classes).to(self.device)
         self.criterion = nn.CrossEntropyLoss()
         self.cate = CATE()
-        trainable_params = chain(self.cate.parameters(), self.ad_net.parameters(), self.aggregator.parameters(),self.text_net.parameters(),self.concept_net.parameters(),self.global_net.parameters(),self.relation_net.parameters())
+        trainable_params = chain(self.cate.parameters(), self.extractor.fc.parameters(), self.ad_net.parameters(), self.aggregator.parameters(),self.text_net.parameters(),self.concept_net.parameters(),self.global_net.parameters(),self.relation_net.parameters())
         # self.optimizer = torch.optim.SGD(trainable_params, lr=self.lr, momentum=0.9, weight_decay=1e-4)
         # self.scheduler = MultiStepLR(self.optimizer, milestones=[20, 50, 100], gamma=0.1)
-        self.optimizer = Adam(trainable_params, lr=1e-3)  
+        self.optimizer = Adam(trainable_params, lr=2e-3)  
         self.scheduler = ReduceLROnPlateau(
             self.optimizer, 
             mode='min',     
             factor=0.1,  
             patience=3,     
             verbose=True,   
-            min_lr=1e-6  
+            min_lr=2e-6  
         )
         self.recovery_weight = 1
         # self.num_loacal  = 5
@@ -107,13 +110,13 @@ class MultiViewFGVC(nn.Module):
             # torch.cuda.empty_cache()
 
             loss = self.criterion(all_logits + (self.recovery_weight * local_logits) + global_logits + text_logits + (self.recovery_weight * concept_logits), labels)+cc_loss
-            #print(loss
+            # loss = self.criterion(all_logits + (self.recovery_weight * local_logits) + global_logits + text_logits + (self.recovery_weight * concept_logits), labels)
             loss.backward()
             self.optimizer.step()
         # 每save_interval轮保存一次权重
-        if (epoch + 1) % save_interval == 0:
-            torch.save(self.state_dict(), f"{save_path}/model_epoch_{epoch + 1}.pth")
-            print(f"Model weights saved for epoch {epoch + 1} at {save_path}/model_epoch_{epoch + 1}.pth")
+        # if (epoch + 1) % save_interval == 0:
+        #     torch.save(self.state_dict(), f"{save_path}/model_epoch_{epoch + 1}.pth")
+        #     print(f"Model weights saved for epoch {epoch + 1} at {save_path}/model_epoch_{epoch + 1}.pth")
         
     @torch.no_grad()
     def test(self, testloader, epoch):
@@ -161,10 +164,11 @@ class MultiViewFGVC(nn.Module):
             #print(logits)
             cc_loss = self.concept_contrastive_loss(global_im,p_c,n_c,weights)
             loss = self.criterion(all_logits + (self.recovery_weight * local_logits) + global_logits + text_logits + (self.recovery_weight * concept_logits), labels) + cc_loss
+            # loss = self.criterion(all_logits + (self.recovery_weight * local_logits) + global_logits + text_logits + (self.recovery_weight * concept_logits), labels)
             loss_list.append(loss)
              # 计算正确率
             predicted = self.predict(global_logits,local_logits,text_logits,all_logits,concept_logits)  # 获取每个样本的预测标签
-            correct += (predicted.reshape(-1) == labels).sum().item()  # 统计预测正确的数量
+            correct += (predicted.reshape(-1) == labels).sum().item()  # 统计预测正确的数量predicted.reshape(-1) == labels
             total += labels.size(0)  # 总样本数
             accuracy = 100 * correct / total
         mean_loss = sum(loss_list) / len(loss_list)
