@@ -2,7 +2,7 @@ from openai import OpenAI
 from tqdm import tqdm
 
 # 创建 OpenAI 客户端
-client = OpenAI(api_key="sk-6e0095b00fb94397b9cb04ea293379c5", base_url="https://api.deepseek.com")
+client = OpenAI(api_key="", base_url="https://api.deepseek.com")
 
 # 读取txt文件，假设文件名为 "bird_list.txt"
 with open("classes.txt", "r") as file:

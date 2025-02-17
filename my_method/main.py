@@ -11,6 +11,7 @@ import time
 from transforms import RProxyTransformTrain, RProxyTransformTest
 from fgvc_dataset.cub2011 import Cub2011
 from fgvc_dataset.aircraft import Aircraft
+from chaos.train import MultiViewHausdorff
 
 def main():
     args = Options().parse()
@@ -45,7 +46,7 @@ def main():
     # model.load_state_dict(state_dict, strict=True)
     extractor = resnet.resnet50(pth_path="/root/autodl-tmp/fine/my_method/resnet50-19c8e357.pth",pretrained=True)
     train_model = MultiViewFGVC(input_dim=512,feature_dim=512,num_classes = 200,device='cuda',clip_model=model,lr=args.lr,extractor=extractor)
-    # train_model = EnhancedMultiViewHausdorff(input_dim=512,feature_dim=512,device='cuda',clip_model=model,lr=args.lr,extractor=extractor,circle_layers=5, circle_step=20)    
+    # train_model = MultiViewHausdorff(input_dim=512,feature_dim=512,device='cuda',clip_model=model,lr=args.lr,extractor=extractor)    
     for epoch in range(args.epochs):
         train_model.train_one_epoch(train_loader, epoch,args.savepath)
         train_model.test(test_loader, epoch)

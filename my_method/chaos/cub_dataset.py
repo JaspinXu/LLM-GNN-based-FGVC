@@ -4,17 +4,11 @@ from PIL import Image
 from torchvision import transforms
 from torch.utils.data import DataLoader
 import torch
-from model import graphgen,GCN,compute_reprs
+# from model import graphgen,GCN,compute_reprs
 from openai import OpenAI
 import os
 import base64
 import json
-api_key = "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"
-os.environ["OPENAI_API_KEY"] = api_key
-os.environ["http_proxy"] = "http://localhost:7890"
-os.environ["https_proxy"] = "http://localhost:7890"
-client = OpenAI()
-
 
 # Function to encode the image
 def encode_image(image_path):
@@ -33,7 +27,7 @@ class CUBImageDataset(Dataset):
         self.root_dir = root_dir
         self.transform = transform
         self.image_paths = []
-        self.labels = []
+        self.labels = []   #0-199
         self.label_mapping = self._load_label_mapping(label_file)
 
         # 遍历大文件夹，收集所有图像路径及其对应的标签
@@ -77,10 +71,10 @@ class CUBImageDataset(Dataset):
 
         return (image,description), label
     
-'''
+
 device = 'cuda'
-root_dir = '/root/autodl-tmp/my_method/data/CUB_200_2011/images'
-label_file = '/root/autodl-tmp/my_method/data/CUB_200_2011/classes.txt'
+root_dir = '/root/autodl-tmp/fine/my_method/data/cub2011/CUB_200_2011/images'
+label_file = '/root/autodl-tmp/fine/my_method/data/cub2011/CUB_200_2011/classes.txt'
 # 数据变换操作
 # 数据变换操作
 transform = transforms.Compose([
@@ -91,8 +85,37 @@ transform = transforms.Compose([
 bs=64
 dataset = CUBImageDataset(root_dir=root_dir, label_file=label_file, transform=transform)
 dataloader = DataLoader(dataset, batch_size=bs, shuffle=True)
-model, preprocess = clip.load("ViT-B/32", device="cuda" if torch.cuda.is_available() else "cpu")
+dataset.__getitem__(0) 
+'''
+torch.Size([3, 672, 672])
+((tensor([[[ 1.3172,  1.3172,  1.3318,  ...,  1.6092,  1.6092,  1.6092],
+         [ 1.3172,  1.3172,  1.3172,  ...,  1.6092,  1.6238,  1.6238],
+         [ 1.3172,  1.3172,  1.3172,  ...,  1.6092,  1.6238,  1.6238],
+         ...,
+         [ 1.3464,  1.3464,  1.3464,  ...,  0.8063,  0.7771,  0.7771],
+         [ 1.3756,  1.3756,  1.3756,  ...,  0.7771,  0.7479,  0.7333],
+         [ 1.4048,  1.4048,  1.3902,  ...,  0.7333,  0.7041,  0.6895]],
 
+        [[ 1.4446,  1.4446,  1.4596,  ...,  1.8648,  1.8498,  1.8498],
+         [ 1.4446,  1.4446,  1.4446,  ...,  1.8648,  1.8648,  1.8648],
+         [ 1.4446,  1.4446,  1.4446,  ...,  1.8798,  1.8798,  1.8798],
+         ...,
+         [ 1.5946,  1.5946,  1.5946,  ...,  0.6642,  0.6491,  0.6341],
+         [ 1.6247,  1.6247,  1.6247,  ...,  0.6341,  0.6041,  0.5891],
+         [ 1.6547,  1.6547,  1.6397,  ...,  0.5891,  0.5591,  0.5441]],
+
+        [[ 1.6624,  1.6624,  1.6766,  ...,  2.0037,  2.0179,  2.0179],
+         [ 1.6624,  1.6624,  1.6624,  ...,  2.0037,  2.0179,  2.0321],
+         [ 1.6624,  1.6624,  1.6624,  ...,  2.0037,  2.0179,  2.0179],
+         ...,
+         [ 1.8757,  1.8757,  1.8615,  ..., -0.2431, -0.2573, -0.2573],
+         [ 1.9042,  1.9042,  1.8757,  ..., -0.2715, -0.2857, -0.2857],
+         [ 1.9326,  1.9184,  1.8899,  ..., -0.3142, -0.3284, -0.3284]]]), 
+         'This bird appears to resemble a type of seabird, particularly one similar to an albatross or a petrel. In the image, the bird has a predominantly gray body, with a lighter face and a distinct beak. It stands on a sandy surface, surrounded by green foliage. The posture suggests it is engaged in some form of activity, possibly walking or foraging. These characteristics are typical of seabirds that inhabit coastal areas.'), 0)
+'''
+
+'''
+model, preprocess = clip.load("ViT-B/32", device="cuda" if torch.cuda.is_available() else "cpu")
 # 迭代加载数据
 for images, labels in dataloader:
     print(f'图像批量大小: {images.shape}, 标签批量大小: {labels.shape}')
@@ -112,3 +135,5 @@ for images, labels in dataloader:
     semrel_graphs = compute_reprs(output,512,350)
     print(semrel_graphs.shape)
     break  # 仅显示一个批次'''
+'''
+'''

@@ -24,10 +24,11 @@ class MultiViewFGVC(nn.Module):
         self.num_classes = num_classes
         self.clip = clip_model.to(self.device)
         self.lr = lr
-        self.extractor = extractor.to(self.device)
-        for param in self.extractor.parameters():
+        extractor = extractor.to(self.device)
+        for param in extractor.parameters():
             param.requires_grad = False
-        self.extractor.fc = nn.Linear(self.extractor.fc.in_features, self.num_classes)
+        extractor.fc = nn.Linear(extractor.fc.in_features, self.num_classes)
+        self.extractor = extractor.to(self.device)
         self.aggregator = GCN(num_in_features=input_dim, num_out_features=feature_dim).to(self.device)
         self.ad_net=Mapper(feature_dim=feature_dim,out_dim=feature_dim,num_classes=self.num_classes).to(self.device)
         self.global_net = Mapper(feature_dim=feature_dim, out_dim=feature_dim, num_classes=self.num_classes).to(self.device)
@@ -39,14 +40,14 @@ class MultiViewFGVC(nn.Module):
         trainable_params = chain(self.cate.parameters(), self.extractor.fc.parameters(), self.ad_net.parameters(), self.aggregator.parameters(),self.text_net.parameters(),self.concept_net.parameters(),self.global_net.parameters(),self.relation_net.parameters())
         # self.optimizer = torch.optim.SGD(trainable_params, lr=self.lr, momentum=0.9, weight_decay=1e-4)
         # self.scheduler = MultiStepLR(self.optimizer, milestones=[20, 50, 100], gamma=0.1)
-        self.optimizer = Adam(trainable_params, lr=2e-3)  
+        self.optimizer = Adam(trainable_params, lr=1e-3)  
         self.scheduler = ReduceLROnPlateau(
             self.optimizer, 
             mode='min',     
             factor=0.1,  
-            patience=3,     
+            patience=5,     
             verbose=True,   
-            min_lr=2e-6  
+            min_lr=1e-6  
         )
         self.recovery_weight = 1
         # self.num_loacal  = 5

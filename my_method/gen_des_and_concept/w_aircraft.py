@@ -2,7 +2,7 @@ from openai import OpenAI
 from tqdm import tqdm
 
 # 创建 OpenAI 客户端
-client = OpenAI(api_key="sk-6e0095b00fb94397b9cb04ea293379c5", base_url="https://api.deepseek.com")
+client = OpenAI(api_key="", base_url="https://api.deepseek.com")
 
 # 读取飞机型号列表文件
 with open("/root/autodl-tmp/fine/my_method/data/aircraft/fgvc-aircraft-2013b/data/variants.txt", "r") as file:

@@ -6,8 +6,8 @@ from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 # import clip
 import torch
-from model import graphgen,GCN,Mapper,DisjointRelationNet
-from my_method.chaos.cub_dataset import CUBImageDataset
+from model import graphgen,GCN,Mapper,DisjointRelationNet,DisjointRelationNet_old
+from chaos.cub_dataset import CUBImageDataset
 import torch.nn as nn
 from tqdm import tqdm
 from itertools import chain
@@ -27,7 +27,7 @@ class MultiViewHausdorff(nn.Module):
         self.ad_net=Mapper(feature_dim=feature_dim,out_dim=feature_dim,num_classes=200).to(self.device)
         self.global_net = Mapper(feature_dim=feature_dim, out_dim=feature_dim, num_classes=200).to(self.device)
         self.text_net = Mapper(feature_dim=feature_dim, out_dim=feature_dim, num_classes=200).to(self.device)
-        self.relation_net = DisjointRelationNet(feature_dim=feature_dim * 3, out_dim=feature_dim, num_classes=200).to(self.device)
+        self.relation_net = DisjointRelationNet_old(feature_dim=feature_dim * 3, out_dim=feature_dim, num_classes=200).to(self.device)
         self.criterion = nn.CrossEntropyLoss()
         trainable_params = chain(self.ad_net.parameters(), self.aggregator.parameters(),self.text_net.parameters(),self.global_net.parameters(),self.relation_net.parameters())
         self.optimizer = torch.optim.SGD(trainable_params, lr=self.lr, momentum=0.9, weight_decay=1e-4)
@@ -56,7 +56,7 @@ class MultiViewHausdorff(nn.Module):
             with torch.no_grad(): 
                 global_im = ve.extract_global(global_im,self.extractor)
                 #print(global_im.shape)
-                lacal_im = ve.extract_local(global_im,num_local=self.num_loacal,crop_mode="random")
+                lacal_im = ve.extract_local(global_im,num_local=self.num_loacal,divide=3,crop_mode="random")
                 lacal_im = lacal_im.to(self.device)
                 #print(lacal_im.shape)
                 image_features = self.clip.encode_image(lacal_im)
@@ -86,9 +86,9 @@ class MultiViewHausdorff(nn.Module):
             loss.backward()
             self.optimizer.step()
         # 每save_interval轮保存一次权重
-        if (epoch + 1) % save_interval == 0:
-            torch.save(self.state_dict(), f"{save_path}/model_epoch_{epoch + 1}.pth")
-            print(f"Model weights saved for epoch {epoch + 1} at {save_path}/model_epoch_{epoch + 1}.pth")
+        # if (epoch + 1) % save_interval == 0:
+        #     torch.save(self.state_dict(), f"{save_path}/model_epoch_{epoch + 1}.pth")
+        #     print(f"Model weights saved for epoch {epoch + 1} at {save_path}/model_epoch_{epoch + 1}.pth")
         
     @torch.no_grad()
     def test(self, testloader, epoch):
@@ -114,7 +114,7 @@ class MultiViewHausdorff(nn.Module):
             text_input = longclip.tokenize(text_descriptions).to(self.device)
             with torch.no_grad(): 
                 global_im = ve.extract_global(global_im,self.extractor)
-                lacal_im = ve.extract_local(global_im,num_local=self.num_loacal,crop_mode="random")
+                lacal_im = ve.extract_local(global_im,num_local=self.num_loacal,divide=3,crop_mode="random")
                 lacal_im = lacal_im.to(self.device)
                 image_features = self.clip.encode_image(lacal_im)
                 #text_features = self.clip.encode_text(text_input)
