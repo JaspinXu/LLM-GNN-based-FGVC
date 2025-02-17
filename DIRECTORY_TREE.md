@@ -64,44 +64,6 @@
 │   ├── proxy_utils.sh
 │   ├── transforms.py
 │   └── gen_structure.py
-├── old_method/
-│   ├── src/
-│   │   ├── clip/
-│   │   ├── models/
-│   │   │   ├── disjoint_encoding.py
-│   │   │   ├── global_only.py
-│   │   │   ├── gnn_agg_hausdorff.py
-│   │   │   ├── gnn_agg_ondisk.py
-│   │   │   ├── gnn_agg_online.py
-│   │   │   ├── holistic_encoding.py
-│   │   │   ├── multiview_hausdorff.py
-│   │   │   ├── proxy_graph.py
-│   │   │   ├── relational_proxies.py
-│   │   │   └── transformer_agg.py
-│   │   ├── networks/
-│   │   │   ├── ast.py
-│   │   │   ├── class_proxy.py
-│   │   │   ├── encoder.py
-│   │   │   ├── gcn.py
-│   │   │   ├── relation_net.py
-│   │   │   └── resnet.py
-│   │   ├── utils/
-│   │   │   ├── auto_load_resume.py
-│   │   │   ├── cate.py
-│   │   │   ├── constants.py
-│   │   │   ├── enhanced.py
-│   │   │   ├── factory.py
-│   │   │   ├── infonce.py
-│   │   │   ├── misc.py
-│   │   │   ├── options.py
-│   │   │   ├── organize_datasets.py
-│   │   │   ├── transforms.py
-│   │   │   └── view_extractor.py
-│   │   ├── Laysan_Albatross_0003_1033.jpg
-│   │   ├── cub_dataset_.py
-│   │   ├── data_split.json
-│   │   ├── main.py
-│   │   └── t.py
 │   ├── .gitignore
 │   ├── LICENSE
 │   ├── README.md
